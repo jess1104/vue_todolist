@@ -15,6 +15,7 @@ export default new Vuex.Store({
   },
   getters: {
     list(state) {
+      // 給假id
       return state.todos.map((todo, tId) => {
         return {
           todo,
@@ -47,18 +48,19 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    createTodo({ commit }, { todo }) {
+    createTodo({ commit }, payload) {
       // 讀取跟新增
       const todos = STORE.load();
-      todos.push(todo);
-      console.log(todos);
+      // console.log(payload);
+      todos.push(payload);
+      // console.log(todos);
       STORE.set(todos);
       // 寫入state
       commit("setTodos", todos);
       // 返回
       return {
         tId: todos.length - 1,
-        todo,
+        payload,
       };
     },
     readTodos({ commit }) {
@@ -90,7 +92,9 @@ export default new Vuex.Store({
       // 讀取
       const todos = STORE.load();
       // 刪出來的
+      console.log(commit);
       const todo = todos.splice(tId, 1)[0];
+      console.log(todo);
       // localStorage.setItem
       STORE.set(todos);
       // 寫入state
