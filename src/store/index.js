@@ -74,27 +74,29 @@ export default new Vuex.Store({
         todos,
       };
     },
-    updateTodo({ commit }, { tId, todo }) {
+    updateTodo({ commit }, { tId, content }) {
       // 讀取
       const todos = STORE.load();
+      console.log("id:" + tId, "content:" + content);
+      console.log(todos);
       // 修改這筆todo
-      todos.splice(tId, 1, todo);
+      todos.splice(tId, 1, { content, done: false });
       STORE.set(todos);
       // 寫入state
       commit("setTodos", todos);
       // 返回
       return {
         tId,
-        todo,
+        content,
       };
     },
     deleteTodo({ commit }, { tId }) {
       // 讀取
       const todos = STORE.load();
       // 刪出來的
-      console.log(commit);
+      // console.log(commit);
       const todo = todos.splice(tId, 1)[0];
-      console.log(todo);
+      // console.log(todo);
       // localStorage.setItem
       STORE.set(todos);
       // 寫入state

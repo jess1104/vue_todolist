@@ -18,12 +18,14 @@
         <template v-if="edit !== item.tId">
           <!-- input 控制資料 true/false -->
           <input type="checkbox" v-model="item.todo.done" />{{ item.todo.content }}
-          <button>編輯</button>
+          <button @click="edit = item.tId">編輯</button>
           <button @click="deleteTodo(item)">刪除</button>
         </template>
         <template v-else>
           <!-- 當edit===tId時就顯示編輯模式 -->
           <input type="text" v-model="item.todo.content" />
+          <button @click="edit = null">取消</button>
+          <button @click="updateTodo({ tId: item.tId, content: item.todo.content }), (edit = null)">確定</button>
         </template>
       </li>
     </ul>
@@ -64,27 +66,55 @@ export default {
   methods: {
     addItem: function() {
       if (this.newInput.trim()) {
-        // this.list.push({
-        //   id: Math.floor(Date.now()),
-        //   content: this.newInput,
-        //   done: false,
-        // });
         let payload = { content: this.newInput, done: false };
         // console.log(payload);
-        let newItem = this.$store.dispatch("createTodo", payload);
+        // 執行createTodo將值回傳回去
+        this.$store.dispatch("createTodo", payload);
         this.newInput = "";
-        newItem.then((res) => console.log(res));
+        // let newItem = this.$store.dispatch("createTodo", payload);
+        // newItem.then((res) => console.log(res));
       }
     },
     editItem: function(target) {
-      target.content = this.editingInput;
-      this.editingItem = {};
+      // console.log(target);
+      this.edit = target;
+      // target.content = this.editingInput;
+      // this.editingItem = {};
     },
     ...mapActions(["deleteTodo", "createTodo", "updateTodo"]),
+  },
+  mounted() {
+    this.$store.dispatch("readTodos");
   },
 };
 </script>
 <style scoped>
+ol,
+ul {
+  list-style: none;
+}
+input,
+button {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+button {
+  cursor: pointer;
+  padding: 5px;
+  background-color: #753;
+  color: #eca;
+  border-radius: 3px;
+}
+button:hover {
+  background-color: #eca;
+  color: #753;
+}
+input {
+  padding: 5px;
+  background-color: #eca;
+}
 .todo a {
   color: black;
   text-decoration: none;
