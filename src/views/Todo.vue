@@ -5,34 +5,44 @@
     <router-link to="/todo" replace>All</router-link> |
     <router-link :to="{ name: 'Todo', query: { filter: 'active' } }" replace>Active</router-link> |
     <router-link :to="{ name: 'Todo', query: { filter: 'done' } }" replace>Done</router-link> |
-    <div class="input">
+    <div class="top-input">
       <input type="text" placeholder="請輸入新事項" v-model="newInput" />
       <button @click="addItem()">新增</button>
     </div>
-    <!-- <p>show:{{ filter }}</p>
-    <div>{{ list }}</div> -->
-    <ul>
+    <ul class="content">
       <!-- 顯示模式/編輯模式 -->
-      <li v-for="item of list" :key="item.tId">
+      <li v-for="item of filterList" :key="item.tId">
         <!-- 預設edit:null 不等於任何tId所以秀出顯示模式 -->
         <template v-if="edit !== item.tId">
-          <!-- input 控制資料 true/false -->
-          <input type="checkbox" v-model="item.todo.done" />{{ item.todo.content }}
-          <button @click="edit = item.tId">編輯</button>
-          <button @click="deleteTodo(item)">刪除</button>
+          <div class="input">
+            <!-- input 控制資料 true/false -->
+            <input type="checkbox" v-model="item.todo.done" />{{ item.todo.content }}
+          </div>
+          <div class="button">
+            <button @click="edit = item.tId">編輯</button>
+            <button @click="deleteTodo(item)">刪除</button>
+            <div class="sort-button">
+              <button @click="upRecord(item.tId)"><i class="fas fa-chevron-up"></i></button>
+              <button><i class="fas fa-chevron-down"></i></button>
+            </div>
+          </div>
         </template>
         <template v-else>
           <!-- 當edit===tId時就顯示編輯模式 -->
-          <input type="text" v-model="item.todo.content" />
-          <button @click="edit = null">取消</button>
-          <button @click="updateTodo({ tId: item.tId, content: item.todo.content }), (edit = null)">確定</button>
+          <div class="input">
+            <input type="text" v-model="item.todo.content" />
+          </div>
+          <div class="button">
+            <button @click="edit = null">取消</button>
+            <button @click="updateTodo({ tId: item.tId, content: item.todo.content }), (edit = null)">確定</button>
+          </div>
         </template>
       </li>
     </ul>
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 export default {
   data() {
     return {
@@ -43,7 +53,6 @@ export default {
       filter: "all",
       // 是否編輯
       edit: null,
-      ...mapState(["todos"]),
     };
   },
   watch: {
@@ -59,9 +68,11 @@ export default {
   },
   computed: {
     // 去拿store篩選後的getters
-    list() {
+    filterList() {
       return this.$store.getters.filterList(this.filter);
     },
+    ...mapState(["todos"]),
+    ...mapGetters(["list"]),
   },
   methods: {
     addItem: function() {
@@ -75,20 +86,29 @@ export default {
         // newItem.then((res) => console.log(res));
       }
     },
-    editItem: function(target) {
-      // console.log(target);
-      this.edit = target;
-      // target.content = this.editingInput;
-      // this.editingItem = {};
+    upRecord: function(index) {
+      if (index === 0) {
+        console.log("是最上層０");
+        return;
+      }
+      console.log(this.todos);
+      // console.log(this.list);
+      console.log(index);
+      // let newList = [...this.list];
+      // console.log(newList);
+      // this.list[index - 1] = this.list[index];
+      // this.list[index] = newList[index - 1];
+      // index = index - 1;
+      // console.log(index);
     },
-    ...mapActions(["deleteTodo", "createTodo", "updateTodo"]),
+    ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos"]),
   },
   mounted() {
     this.$store.dispatch("readTodos");
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
 ol,
 ul {
   list-style: none;
@@ -100,26 +120,102 @@ button {
   padding: 0;
   outline: none;
 }
-button {
-  cursor: pointer;
-  padding: 5px;
-  background-color: #753;
-  color: #eca;
-  border-radius: 3px;
+h1 {
+  color: #3e517a;
 }
-button:hover {
-  background-color: #eca;
-  color: #753;
-}
-input {
-  padding: 5px;
-  background-color: #eca;
-}
-.todo a {
-  color: black;
-  text-decoration: none;
-}
-.todo .router-link-exact-active {
-  color: green;
+.todo {
+  padding: 10px;
+  width: 400px;
+  border-radius: 10px;
+  background-color: #70cad1;
+  a {
+    color: #3e517a;
+    text-decoration: none;
+  }
+  .router-link-exact-active {
+    color: #0b5a8c;
+    font-weight: bold;
+  }
+  .top-input {
+    margin: 5px auto;
+    border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #8ee3f5;
+    input {
+      padding: 10px;
+      border-radius: 3px;
+      background-color: #8ee3f5;
+    }
+    button {
+      padding: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      color: #3e517a;
+      background-color: #8ee3f5;
+      &:hover {
+        color: #8ee3f5;
+        background-color: #3e517a;
+      }
+      &:active {
+        color: #3e517a;
+        background-color: #8ee3f5;
+      }
+    }
+  }
+  .content {
+    margin: 0 auto;
+
+    li {
+      margin: 5px 0;
+      padding: 5px 0;
+      border-radius: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #8ee3f5;
+      .input {
+        width: 150px;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        input {
+          padding: 5px 5px;
+          margin: 0 5px;
+        }
+      }
+    }
+    .button {
+      display: flex;
+      button {
+        height: 33px;
+        cursor: pointer;
+        padding: 0 3px;
+        margin-right: 3px;
+        border-radius: 3px;
+        color: #8ee3f5;
+        background-color: #3e517a;
+        &:hover {
+          color: #3e517a;
+          background-color: #caf9ed;
+        }
+      }
+      .sort-button {
+        // float: right;
+        display: flex;
+        flex-direction: column;
+        button {
+          height: 15px;
+          &:first-child {
+            margin-bottom: 3px;
+          }
+        }
+        i {
+          transform: scale(0.8, 0.8);
+        }
+      }
+    }
+  }
 }
 </style>
