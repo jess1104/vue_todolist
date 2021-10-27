@@ -11,7 +11,7 @@
     </div>
     <ul class="content">
       <!-- 顯示模式/編輯模式 -->
-      <li v-for="item of filterList" :key="item.tId">
+      <li v-for="item of list" :key="item.tId">
         <!-- 預設edit:null 不等於任何tId所以秀出顯示模式 -->
         <template v-if="edit !== item.tId">
           <div class="input">
@@ -42,13 +42,14 @@
   </div>
 </template>
 <script>
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapActions } from "vuex";
+import LocalStorage from "../module/LocalStorage";
+const STORE = new LocalStorage("todo-vue");
+
 export default {
   data() {
     return {
       newInput: "",
-      editingItem: {},
-      editingInput: {},
       // all,active,done
       filter: "all",
       // 是否編輯
@@ -68,39 +69,51 @@ export default {
   },
   computed: {
     // 去拿store篩選後的getters
-    filterList() {
+    list() {
       return this.$store.getters.filterList(this.filter);
     },
-    ...mapState(["todos"]),
-    ...mapGetters(["list"]),
   },
   methods: {
     addItem: function() {
       if (this.newInput.trim()) {
-        let payload = { content: this.newInput, done: false };
-        // console.log(payload);
+        let newObj = { content: this.newInput, done: false };
+        // console.log(newObj);
         // 執行createTodo將值回傳回去
-        this.$store.dispatch("createTodo", payload);
+        this.$store.dispatch("createTodo", newObj);
         this.newInput = "";
-        // let newItem = this.$store.dispatch("createTodo", payload);
+        // let newItem = this.$store.dispatch("createTodo", newObj);
         // newItem.then((res) => console.log(res));
       }
     },
     upRecord: function(index) {
-      if (index === 0) {
-        console.log("是最上層０");
-        return;
-      }
-      console.log(this.todos);
-      // console.log(this.list);
       console.log(index);
-      // let newList = [...this.list];
-      // console.log(newList);
-      // this.list[index - 1] = this.list[index];
-      // this.list[index] = newList[index - 1];
-      // index = index - 1;
+      // 把local讀進來
+      const todos = STORE.load();
+      console.log(todos);
+      // 先淺拷貝一個list
+      let newList = [...this.list];
+      console.log(newList);
+      // 點到的位置值交換
+      this.list[index - 1] = this.list[index];
+      // 從拷貝的再把值寫回來
+      this.list[index] = newList[index - 1];
+      // id減一因為往上移動
+      index = index - 1;
+
+      // BUGGGGGGGGGGGGGGGGGGGGGG
+      // 將新的list賦予一個陣列
+      let aaa = this.list.map((item) => {
+        return item.todo;
+      });
+      console.log(aaa);
       // console.log(index);
+      // console.log(this.list)
+      // 寫回state
+      this.$store.commit("setTodos", aaa);
+      // local.set回去
+      STORE.set(aaa);
     },
+
     ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos"]),
   },
   mounted() {

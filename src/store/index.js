@@ -107,5 +107,34 @@ export default new Vuex.Store({
         todo,
       };
     },
+    upRecord({ commit, getters }, payload) {
+      // 讀取跟新增
+      const todos = STORE.load();
+
+      console.log(payload);
+      // console.log(todos);
+      console.log(getters.filterList("all")[1]);
+      // let newList = [...getters.filterList("all")];
+      //   this.list[index - 1] = this.list[index];
+      // this.list[index] = newList[index - 1];
+      // index = index - 1;
+      STORE.set(todos);
+      commit("setTodos", todos);
+    },
   },
+  // upRecord: function(index) {
+  //   if (index === 0) {
+  //     console.log("是最上層０");
+  //     return;
+  //   }
+  //   console.log(this.todos);
+  //   // console.log(this.list);
+  //   console.log(index);
+  //   // let newList = [...this.list];
+  //   // console.log(newList);
+  //   // this.list[index - 1] = this.list[index];
+  //   // this.list[index] = newList[index - 1];
+  //   // index = index - 1;
+  //   // console.log(index);
+  // },
 });
