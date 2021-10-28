@@ -121,6 +121,22 @@ export default new Vuex.Store({
       STORE.set(todos);
       commit("setTodos", todos);
     },
+    checkTodo({ commit }, { tId, done }) {
+      // UPDATE_TODO ({ commit }, { tId, content }) {
+      // 1. PATCH axios.patch()
+      const todos = STORE.load();
+      todos[tId].done = done;
+      console.log(todos);
+      // todos[tId].content = content
+      STORE.set(todos);
+      // 2. commit mutation
+      commit("setTodos", todos);
+      // 3. return
+      return {
+        tId,
+        todo: todos[tId],
+      };
+    },
   },
   // upRecord: function(index) {
   //   if (index === 0) {

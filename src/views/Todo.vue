@@ -16,7 +16,11 @@
         <template v-if="edit !== item.tId">
           <div class="input">
             <!-- input 控制資料 true/false -->
-            <input type="checkbox" v-model="item.todo.done" />{{ item.todo.content }}
+            <input
+              type="checkbox"
+              v-model="item.todo.done"
+              @change="checkTodo({ tId: item.tId, done: item.todo.done })"
+            />{{ item.todo.content }}
           </div>
           <div class="button">
             <button @click="edit = item.tId">編輯</button>
@@ -114,7 +118,7 @@ export default {
       STORE.set(aaa);
     },
 
-    ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos"]),
+    ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos", "checkTodo"]),
   },
   mounted() {
     this.$store.dispatch("readTodos");
