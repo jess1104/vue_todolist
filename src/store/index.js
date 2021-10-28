@@ -107,26 +107,13 @@ export default new Vuex.Store({
         todo,
       };
     },
-    upRecord({ commit, getters }, payload) {
-      // 讀取跟新增
-      const todos = STORE.load();
-
-      console.log(payload);
-      // console.log(todos);
-      console.log(getters.filterList("all")[1]);
-      // let newList = [...getters.filterList("all")];
-      //   this.list[index - 1] = this.list[index];
-      // this.list[index] = newList[index - 1];
-      // index = index - 1;
-      STORE.set(todos);
-      commit("setTodos", todos);
-    },
     checkTodo({ commit }, { tId, done }) {
       // UPDATE_TODO ({ commit }, { tId, content }) {
       // 1. PATCH axios.patch()
       const todos = STORE.load();
+      // 抓到done的狀態賦予todo
       todos[tId].done = done;
-      console.log(todos);
+      // console.log(todos);
       // todos[tId].content = content
       STORE.set(todos);
       // 2. commit mutation
@@ -138,19 +125,4 @@ export default new Vuex.Store({
       };
     },
   },
-  // upRecord: function(index) {
-  //   if (index === 0) {
-  //     console.log("是最上層０");
-  //     return;
-  //   }
-  //   console.log(this.todos);
-  //   // console.log(this.list);
-  //   console.log(index);
-  //   // let newList = [...this.list];
-  //   // console.log(newList);
-  //   // this.list[index - 1] = this.list[index];
-  //   // this.list[index] = newList[index - 1];
-  //   // index = index - 1;
-  //   // console.log(index);
-  // },
 });

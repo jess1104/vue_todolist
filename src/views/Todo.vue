@@ -6,7 +6,7 @@
     <router-link :to="{ name: 'Todo', query: { filter: 'active' } }" replace>Active</router-link> |
     <router-link :to="{ name: 'Todo', query: { filter: 'done' } }" replace>Done</router-link> |
     <div class="top-input">
-      <input type="text" placeholder="請輸入新事項" v-model="newInput" />
+      <input type="text" placeholder="請輸入新事項" v-model.trim="newInput" @keyup.enter="addItem()" />
       <button @click="addItem()">新增</button>
     </div>
     <ul class="content">
@@ -14,7 +14,7 @@
       <li v-for="item of list" :key="item.tId">
         <!-- 預設edit:null 不等於任何tId所以秀出顯示模式 -->
         <template v-if="edit !== item.tId">
-          <div class="input">
+          <div class="input" :class="{ strikeout: item.todo.done }">
             <!-- input 控制資料 true/false -->
             <input
               type="checkbox"
@@ -25,9 +25,9 @@
           <div class="button">
             <button @click="edit = item.tId">編輯</button>
             <button @click="deleteTodo(item)">刪除</button>
-            <div class="sort-button">
+            <div class="sort-button" v-if="filter == 'all'">
               <button @click="upRecord(item.tId)"><i class="fas fa-chevron-up"></i></button>
-              <button><i class="fas fa-chevron-down"></i></button>
+              <button @click="downRecord(item.tId)"><i class="fas fa-chevron-down"></i></button>
             </div>
           </div>
         </template>
@@ -78,8 +78,9 @@ export default {
     },
   },
   methods: {
-    addItem: function() {
-      if (this.newInput.trim()) {
+    ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos", "checkTodo"]),
+    addItem() {
+      if (this.newInput !== "") {
         let newObj = { content: this.newInput, done: false };
         // console.log(newObj);
         // 執行createTodo將值回傳回去
@@ -89,36 +90,37 @@ export default {
         // newItem.then((res) => console.log(res));
       }
     },
-    upRecord: function(index) {
-      console.log(index);
+    upRecord(index) {
       // 把local讀進來
       const todos = STORE.load();
-      console.log(todos);
-      // 先淺拷貝一個list
-      let newList = [...this.list];
-      console.log(newList);
-      // 點到的位置值交換
-      this.list[index - 1] = this.list[index];
-      // 從拷貝的再把值寫回來
-      this.list[index] = newList[index - 1];
-      // id減一因為往上移動
-      index = index - 1;
 
-      // BUGGGGGGGGGGGGGGGGGGGGGG
-      // 將新的list賦予一個陣列
-      let aaa = this.list.map((item) => {
-        return item.todo;
-      });
-      console.log(aaa);
-      // console.log(index);
-      // console.log(this.list)
+      if (index <= 0) {
+        return;
+      }
+      const temp = todos[index];
+      todos[index] = todos[index - 1];
+      todos[index - 1] = temp;
       // 寫回state
-      this.$store.commit("setTodos", aaa);
+      this.$store.commit("setTodos", todos);
       // local.set回去
-      STORE.set(aaa);
+      STORE.set(todos);
     },
-
-    ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos", "checkTodo"]),
+    downRecord(index) {
+      // 把local讀進來
+      const todos = STORE.load();
+      // console.log(index, todos.length);
+      // 陣列總長減一才會等於index,當最後一筆return
+      if (index >= todos.length - 1) {
+        return;
+      }
+      const temp = todos[index];
+      todos[index] = todos[index + 1];
+      todos[index + 1] = temp;
+      // 寫回state
+      this.$store.commit("setTodos", todos);
+      // local.set回去
+      STORE.set(todos);
+    },
   },
   mounted() {
     this.$store.dispatch("readTodos");
@@ -139,6 +141,10 @@ button {
 }
 h1 {
   color: #3e517a;
+}
+.strikeout {
+  text-decoration: line-through;
+  color: grey;
 }
 .todo {
   padding: 10px;
@@ -183,6 +189,9 @@ h1 {
   }
   .content {
     margin: 0 auto;
+    button:active {
+      transform: scale(1.3);
+    }
 
     li {
       margin: 5px 0;
