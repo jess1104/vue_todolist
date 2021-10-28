@@ -1,10 +1,10 @@
 <template>
   <div class="todo">
-    <h1>This is an todo page</h1>
+    <h1>TO DO LIST</h1>
     <!-- 不想太多歷史紀錄用replace -->
-    <router-link to="/todo" replace>All</router-link> |
-    <router-link :to="{ name: 'Todo', query: { filter: 'active' } }" replace>Active</router-link> |
-    <router-link :to="{ name: 'Todo', query: { filter: 'done' } }" replace>Done</router-link> |
+    <router-link to="/" replace>All</router-link> |
+    <router-link :to="{ query: { filter: 'active' } }" replace>Active</router-link> |
+    <router-link :to="{ query: { filter: 'done' } }" replace>Done</router-link> |
     <div class="top-input">
       <input type="text" placeholder="請輸入新事項" v-model.trim="newInput" @keyup.enter="addItem()" />
       <button @click="addItem()">新增</button>
@@ -51,6 +51,7 @@ import LocalStorage from "../module/LocalStorage";
 const STORE = new LocalStorage("todo-vue");
 
 export default {
+  name: "Todo",
   data() {
     return {
       newInput: "",

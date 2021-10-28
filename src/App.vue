@@ -1,8 +1,10 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> | <router-link to="/about">About</router-link> |
-      <router-link to="/todo">Todo</router-link>
+      <!-- 不想太多歷史紀錄用replace -->
+      <!-- <router-link to="/" replace>All</router-link> |
+      <router-link :to="{ query: { filter: 'active' } }" replace>Active</router-link> |
+      <router-link :to="{ query: { filter: 'done' } }" replace>Done</router-link> | -->
     </div>
     <router-view />
   </div>
@@ -30,7 +32,7 @@ body {
 }
 
 #nav {
-  padding: 30px;
+  padding: 10px;
 
   a {
     font-weight: bold;
