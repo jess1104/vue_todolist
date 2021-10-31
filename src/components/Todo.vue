@@ -2,11 +2,17 @@
   <div class="todo">
     <h1>TO DO LIST</h1>
     <!-- 不想太多歷史紀錄用replace -->
-    <router-link to="/" replace>All</router-link> |
-    <router-link :to="{ query: { filter: 'active' } }" replace>Active</router-link> |
-    <router-link :to="{ query: { filter: 'done' } }" replace>Done</router-link> |
+    <router-link to="/all" replace>All</router-link> |
+    <router-link to="/active" replace>Active</router-link> |
+    <router-link to="/done" replace>Done</router-link> |
+
     <div class="top-input">
-      <input type="text" placeholder="請輸入新事項" v-model.trim="newInput" @keyup.enter="addItem()" />
+      <input
+        type="text"
+        placeholder="請輸入新事項"
+        v-model.trim="newInput"
+        @keyup.enter="addItem()"
+      />
       <button @click="addItem()">新增</button>
     </div>
     <ul class="content">
@@ -26,8 +32,12 @@
             <button @click="edit = item.tId">編輯</button>
             <button @click="deleteTodo(item)">刪除</button>
             <div class="sort-button" v-if="filter == 'all'">
-              <button @click="upRecord(item.tId)"><i class="fas fa-chevron-up"></i></button>
-              <button @click="downRecord(item.tId)"><i class="fas fa-chevron-down"></i></button>
+              <button @click="upRecord(item.tId)">
+                <i class="fas fa-chevron-up"></i>
+              </button>
+              <button @click="downRecord(item.tId)">
+                <i class="fas fa-chevron-down"></i>
+              </button>
             </div>
           </div>
         </template>
@@ -38,7 +48,14 @@
           </div>
           <div class="button">
             <button @click="edit = null">取消</button>
-            <button @click="updateTodo({ tId: item.tId, content: item.todo.content }), (edit = null)">確定</button>
+            <button
+              @click="
+                updateTodo({ tId: item.tId, content: item.todo.content }),
+                  (edit = null)
+              "
+            >
+              確定
+            </button>
           </div>
         </template>
       </li>
@@ -56,20 +73,23 @@ export default {
     return {
       newInput: "",
       // all,active,done
-      filter: "all",
+      filter: this.$route.name.toLowerCase(),
       // 是否編輯
       edit: null,
     };
   },
   watch: {
     // this.$router.route.query.filter
-    $route: {
-      //預設route進來不會觸發連動 用immediate以表達式立即觸發回調
-      immediate: true,
-      handler: function(route) {
-        // 檢查切換至哪個e.g all
-        this.filter = route.query.filter || "all";
-      },
+    // $route: {
+    //   //預設route進來不會觸發連動 用immediate以表達式立即觸發回調
+    //   immediate: true,
+    //   handler: function (route) {
+    //     // 檢查切換至哪個e.g all
+    //     this.filter = route.query.filter || "all";
+    //   },
+    // },
+    $route(newVal, oldVal) {
+      this.filter = newVal.name.toLowerCase();
     },
   },
   computed: {
@@ -125,6 +145,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch("readTodos");
+    console.log(this.list);
   },
 };
 </script>
