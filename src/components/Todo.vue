@@ -16,35 +16,40 @@
     </div>
     <ul class="content">
       <!-- 顯示模式/編輯模式 -->
-      <li v-for="item of list" :key="item.tId">
+      <li v-for="(item, index) of list" :key="index">
         <!-- 預設edit:null 不等於任何tId所以秀出顯示模式 -->
-        <template v-if="edit !== item.tId">
-          <div class="input" :class="{ strikeout: item.todo.done }">
+        <template v-if="edit !== index">
+          <div class="input" :class="{ strikeout: item.done }">
             <!-- input 控制資料 true/false -->
             <input
               type="checkbox"
-              v-model="item.todo.done"
-              @change="checkTodo({ tId: item.tId, done: item.todo.done })"
-            />{{ item.todo.content }}
+              v-model="item.done"
+              :id="item.content"
+              @change="checkTodo({ tId: index, done: item.done })"
+            />
+            <!-- @change="checkTodoDone(index, $event)" -->
+            <label :for="item.content">{{ item.content }}</label>
           </div>
           <div class="button">
-            <button @click="edit = item.tId">編輯</button>
-            <button @click="deleteTodo(item)">刪除</button>
-            <div class="sort-button" v-if="filter == 'all'">
-              <button @click="upRecord(item.tId)"><i class="fas fa-chevron-up"></i></button>
-              <button @click="downRecord(item.tId)"><i class="fas fa-chevron-down"></i></button>
+            <button @click="edit = index">編輯</button>
+            <button @click="deleteTodo(index)">刪除</button>
+            <div class="sort-button" v-if="$route.name == 'all'">
+              <button @click="upRecord(index)"><i class="fas fa-chevron-up"></i></button>
+              <button @click="downRecord(index)"><i class="fas fa-chevron-down"></i></button>
             </div>
           </div>
         </template>
         <template v-else>
           <!-- 當edit===tId時就顯示編輯模式 -->
           <div class="input">
-            <input type="text" v-model="item.todo.content" />
+            <input type="text" v-model="item.content" />
           </div>
           <div class="button">
             <button @click="edit = null">取消</button>
             <button
-              @click="updateTodo({ tId: item.tId, content: item.todo.content }), (edit = null)"
+              @click="
+                updateTodo({ tId: index, content: item.content, done: item.done }), (edit = null)
+              "
             >
               確定
             </button>
@@ -55,7 +60,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters, mapState, mapMutations } from "vuex";
 import LocalStorage from "../module/LocalStorage";
 const STORE = new LocalStorage("todo-vue");
 
@@ -77,23 +82,32 @@ export default {
     },
   },
   computed: {
+    ...mapState(["todos"]),
+    ...mapGetters(["filterActive", "filterDone"]),
     // 去拿store篩選後的getters
     list() {
-      return this.$store.getters.filterList(this.filter);
+      if (this.$route.name === "active") {
+        return this.filterActive;
+      } else if (this.$route.name === "done") {
+        return this.filterDone;
+      } else {
+        return this.todos;
+      }
     },
   },
   methods: {
+    ...mapMutations(["setTodos"]),
     ...mapActions(["deleteTodo", "createTodo", "updateTodo", "readTodos", "checkTodo"]),
     addItem() {
       if (this.newInput !== "") {
-        let newObj = { content: this.newInput, done: false };
-        // console.log(newObj);
-        // 執行createTodo將值回傳回去
-        this.$store.dispatch("createTodo", newObj);
+        this.createTodo({ content: this.newInput });
         this.newInput = "";
-        // let newItem = this.$store.dispatch("createTodo", newObj);
-        // newItem.then((res) => console.log(res));
       }
+    },
+    checkTodoDone(i, e) {
+      // console.log(i);
+      // console.log(e.target.checked);
+      this.checkTodo({ tId: i, done: e.target.checked });
     },
     upRecord(index) {
       // 把local讀進來
@@ -106,7 +120,7 @@ export default {
       todos[index] = todos[index - 1];
       todos[index - 1] = temp;
       // 寫回state
-      this.$store.commit("setTodos", todos);
+      this.setTodos(todos);
       // local.set回去
       STORE.set(todos);
     },
@@ -122,13 +136,13 @@ export default {
       todos[index] = todos[index + 1];
       todos[index + 1] = temp;
       // 寫回state
-      this.$store.commit("setTodos", todos);
+      this.setTodos(todos);
       // local.set回去
       STORE.set(todos);
     },
   },
-  mounted() {
-    this.$store.dispatch("readTodos");
+  created() {
+    this.readTodos();
   },
 };
 </script>
@@ -173,11 +187,13 @@ h1 {
     align-items: center;
     background-color: #8ee3f5;
     input {
+      width: 85%;
       padding: 10px;
       border-radius: 3px;
       background-color: #8ee3f5;
     }
     button {
+      width: 15%;
       padding: 10px;
       border-radius: 3px;
       cursor: pointer;

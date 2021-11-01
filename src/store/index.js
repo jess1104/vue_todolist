@@ -14,33 +14,15 @@ export default new Vuex.Store({
     ],
   },
   getters: {
-    list(state) {
-      // 給假id
-      return state.todos.map((todo, tId) => {
-        return {
-          todo,
-          tId,
-        };
+    filterActive(state) {
+      return state.todos.filter((todo) => {
+        return !todo.done;
       });
     },
-    filterList(state, getters) {
-      // 對getters.list做篩選
-      return (filter) => {
-        switch (filter) {
-          case "all":
-            return getters.list;
-          case "active":
-            return getters.list.filter((todo) => {
-              return !todo.todo.done;
-            });
-          case "done":
-            return getters.list.filter((todo) => {
-              return todo.todo.done;
-            });
-          default:
-            return [];
-        }
-      };
+    filterDone(state) {
+      return state.todos.filter((todo) => {
+        return todo.done;
+      });
     },
   },
   mutations: {
@@ -49,20 +31,14 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    createTodo({ commit }, payload) {
+    createTodo({ commit }, { content }) {
       // 讀取跟新增
       const todos = STORE.load();
-      // console.log(payload);
-      todos.push(payload);
-      // console.log(todos);
+      todos.push({ content, done: false });
+      // set到local
       STORE.set(todos);
       // 寫入state
       commit("setTodos", todos);
-      // 返回
-      return {
-        tId: todos.length - 1,
-        payload,
-      };
     },
     readTodos({ commit }) {
       // 讀取
@@ -75,13 +51,13 @@ export default new Vuex.Store({
         todos,
       };
     },
-    updateTodo({ commit }, { tId, content }) {
+    updateTodo({ commit }, { tId, content, done }) {
       // 讀取
       const todos = STORE.load();
-      console.log("id:" + tId, "content:" + content);
+      console.log("id:" + tId, "content:" + content, done);
       console.log(todos);
       // 修改這筆todo
-      todos.splice(tId, 1, { content, done: false });
+      todos.splice(tId, 1, { content, done });
       STORE.set(todos);
       // 寫入state
       commit("setTodos", todos);
@@ -91,39 +67,23 @@ export default new Vuex.Store({
         content,
       };
     },
-    deleteTodo({ commit }, { tId }) {
+    deleteTodo({ commit }, tId) {
       // 讀取
       const todos = STORE.load();
       // 刪出來的
-      // console.log(commit);
-      const todo = todos.splice(tId, 1)[0];
-      // console.log(todo);
+      todos.splice(tId, 1);
       // localStorage.setItem
       STORE.set(todos);
       // 寫入state
       commit("setTodos", todos);
-      // 返回
-      return {
-        tId: null,
-        todo,
-      };
     },
     checkTodo({ commit }, { tId, done }) {
-      // UPDATE_TODO ({ commit }, { tId, content }) {
-      // 1. PATCH axios.patch()
       const todos = STORE.load();
       // 抓到done的狀態賦予todo
       todos[tId].done = done;
-      // console.log(todos);
-      // todos[tId].content = content
       STORE.set(todos);
       // 2. commit mutation
       commit("setTodos", todos);
-      // 3. return
-      return {
-        tId,
-        todo: todos[tId],
-      };
     },
   },
 });
