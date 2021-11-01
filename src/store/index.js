@@ -24,6 +24,7 @@ export default new Vuex.Store({
       });
     },
     filterList(state, getters) {
+      // 對getters.list做篩選
       return (filter) => {
         switch (filter) {
           case "all":
