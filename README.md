@@ -1,27 +1,8 @@
 # todolist
 
-## 卡關：
+## DEMO：
 
-- Todo.vue 89 行 找不到如何改動 vuex 的 store
-
-```javascript=
-pRecord: function(index) {
-      if (index === 0) {
-        console.log("是最上層０");
-        return;
-      }
-      console.log(this.todos);
-      // console.log(this.list);
-      console.log(index);
-      // let newList = [...this.list];
-      // console.log(newList);
-      // this.list[index - 1] = this.list[index];
-      // this.list[index] = newList[index - 1];
-      // index = index - 1;
-      // console.log(index);
-    },
-```
-
+https://jess1104.github.io/vue_todolist/#/
 ## Project setup
 
 ```
